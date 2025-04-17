@@ -22,13 +22,12 @@ try:
         description = item.get("description", "")
 
         combined_text = f"{title} {description}".lower()
-        if any(keyword in combined_text for keyword in ["台灣", "中國", "taiwan", "china"]):
-            results.append({
-                "title": title,
-                "link": link,
-                "date": pub_date,
-                "content": description
-            })
+        results.append({
+    "title": title,
+    "link": link,
+    "date": pub_date,
+    "content": description
+})
 except Exception as e:
     print("Parsing error:", e)
 
