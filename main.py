@@ -29,3 +29,4 @@ if WEBHOOK_URL and results:
     requests.post(WEBHOOK_URL, json=results)
 else:
     print("⚠️ No articles or WEBHOOK_URL not set.")
+    print("✅ WEBHOOK_URL =", WEBHOOK_URL)
