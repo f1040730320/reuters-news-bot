@@ -37,6 +37,8 @@ for a in articles[:5]:
 
 # 傳送到 n8n Webhook
 if WEBHOOK_URL:
+    print("Results to be sent:")
+    print(json.dumps(results, indent=2, ensure_ascii=False))  # ✅ 印出你抓到的新聞
     resp = requests.post(WEBHOOK_URL, json=results)
     print(f"POST to n8n status: {resp.status_code}")
 else:
