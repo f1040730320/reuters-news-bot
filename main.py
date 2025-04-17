@@ -1,44 +1,41 @@
-
 import requests
-from bs4 import BeautifulSoup
-import json
+import xml.etree.ElementTree as ET
 import os
+import json
 
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
-search_url = "https://www.reuters.com/site-search/?query=Taiwan+China"
+rss_url = "https://feeds.reuters.com/Reuters/worldNews"
 headers = {"User-Agent": "Mozilla/5.0"}
-res = requests.get(search_url, headers=headers)
-soup = BeautifulSoup(res.text, "html.parser")
 
-articles = soup.select("div.search-result-content")
+res = requests.get(rss_url, headers=headers)
+res.encoding = "utf-8"
+
 results = []
 
-for a in articles[:5]:
-    title_tag = a.select_one("h3.search-result-title > a")
-    if not title_tag:
-        continue
+try:
+    root = ET.fromstring(res.text)
+    for item in root.findall(".//item"):
+        title = item.findtext("title", "")
+        link = item.findtext("link", "")
+        pub_date = item.findtext("pubDate", "")
+        description = item.findtext("description", "")
 
-    title = title_tag.text.strip()
-    link = "https://www.reuters.com" + title_tag["href"]
+        combined_text = f"{title} {description}".lower()
+        if any(keyword in combined_text for keyword in ["台灣", "中國", "taiwan", "china"]):
+            results.append({
+                "title": title,
+                "link": link,
+                "date": pub_date,
+                "content": description
+            })
+except Exception as e:
+    print("Failed to parse RSS:", e)
 
-    article_res = requests.get(link, headers=headers)
-    article_soup = BeautifulSoup(article_res.text, "html.parser")
-    content = " ".join(p.text for p in article_soup.select("div.article-body__content p"))
-    pub_time = article_soup.select_one("time")
-    pub_date = pub_time["datetime"] if pub_time else "N/A"
-
-    results.append({
-        "title": title,
-        "link": link,
-        "content": content[:500],
-        "date": pub_date
-    })
-
-# 傳送到 n8n Webhook
+# 傳送給 n8n Webhook
 if WEBHOOK_URL:
     print("Results to be sent:")
-    print(json.dumps(results, indent=2, ensure_ascii=False))  # ✅ 印出你抓到的新聞
+    print(json.dumps(results, indent=2, ensure_ascii=False))
     resp = requests.post(WEBHOOK_URL, json=results)
     print(f"POST to n8n status: {resp.status_code}")
 else:
