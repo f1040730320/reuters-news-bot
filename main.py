@@ -5,7 +5,7 @@ import json
 
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
-rss_url = "https://feeds.reuters.com/Reuters/worldNews"
+rss_url = "https://apnews.com/rss/apf-intlnews"
 headers = {"User-Agent": "Mozilla/5.0"}
 
 res = requests.get(rss_url, headers=headers)
