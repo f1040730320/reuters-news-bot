@@ -15,6 +15,9 @@ results = []
 
 try:
     data = res.json()
+    data = res.json()
+print("Fetched JSON from rss2json:")
+print(json.dumps(data, indent=2, ensure_ascii=False))
     for item in data.get("items", []):
         title = item.get("title", "")
         link = item.get("link", "")
